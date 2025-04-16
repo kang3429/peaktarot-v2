@@ -151,6 +151,8 @@ export default function Home() {
         🔮 피크타로
       </h1>
 
+      <p className="text-sm sm:text-base text-purple-200 mb-4">타로 점괘를 통해 알고 싶은 고민이나 질문을 입력해보세요.</p>
+
       <input
         type="text"
         placeholder="고민이나 질문을 입력하세요"
