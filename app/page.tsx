@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import "@fontsource/cinzel-decorative";
-import html2canvas from "html2canvas";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -10,8 +9,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState<string[]>([]);
   const [isReversedList, setIsReversedList] = useState<boolean[]>([]);
-  const [copied, setCopied] = useState(false);
-  const resultRef = useRef<HTMLDivElement>(null);
 
   const tarotCards = [
     "00-thefool.jpg", "01-themagician.jpg", "02-thehighpriestess.jpg", "03-theempress.jpg",
@@ -137,37 +134,14 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: `${question} (${reversedList.map(r => r ? "역방향" : "정방향").join(", ")})`
-        }),
+        })
       });
       const data = await res.json();
       setAnswer(data.answer);
-      new Audio("/magic.mp3").play();
     } catch (e) {
       setAnswer("⚠️ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCopyImage = async () => {
-    if (resultRef.current) {
-      const canvas = await html2canvas(resultRef.current, {
-        useCORS: true,
-        backgroundColor: null,
-      });
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob })
-          ]);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-          console.error("클립보드 복사 실패:", err);
-          alert("브라우저에서 이미지 복사를 지원하지 않습니다.");
-        }
-      });
     }
   };
 
@@ -193,13 +167,10 @@ export default function Home() {
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
-      <div ref={resultRef} className="w-full flex flex-col items-center mt-10 gap-4">
+      <div className="w-full flex flex-col items-center mt-10 gap-4">
         <div className="flex flex-col md:flex-row items-center justify-center gap-6">
           {cards.map((card, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center p-2 cursor-pointer transition duration-500 rounded-lg hover:scale-105"
-            >
+            <div key={index} className="flex flex-col items-center p-2">
               <img
                 src={`/cards/${card}`}
                 alt="타로카드"
@@ -229,12 +200,11 @@ export default function Home() {
         </div>
 
         {answer && (
-          <button
-            onClick={handleCopyImage}
-            className="mt-4 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded shadow transition"
-          >
-            {copied ? "✅ 클립보드에 복사됨!" : "📸 리딩 결과 이미지 복사"}
-          </button>
+          <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-5 rounded shadow-md animate-fadeIn">
+            <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
+              {answer.replace(/([.!?])\s+/g, "$1\n\n")}
+            </p>
+          </div>
         )}
       </div>
     </main>
