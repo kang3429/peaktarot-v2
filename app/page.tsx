@@ -154,14 +154,22 @@ export default function Home() {
 
   const handleCopyImage = async () => {
     if (resultRef.current) {
-      const canvas = await html2canvas(resultRef.current);
+      const canvas = await html2canvas(resultRef.current, {
+        useCORS: true,
+        backgroundColor: null,
+      });
       canvas.toBlob(async (blob) => {
-        if (blob) {
+        if (!blob) return;
+  
+        try {
           await navigator.clipboard.write([
             new ClipboardItem({ "image/png": blob })
           ]);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error("클립보드 복사 실패:", err);
+          alert("브라우저에서 이미지 복사를 지원하지 않습니다.");
         }
       });
     }
@@ -221,7 +229,7 @@ export default function Home() {
         {selectedCard && selectedMeaning && (
           <div className="max-w-lg bg-black/50 border border-purple-600 p-4 rounded shadow-xl animate-fadeIn mt-4">
             <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
-              {selectedMeaning}
+            {selectedMeaning ? selectedMeaning.replace(/([.!?])\s+/g, "$1\n\n") : "카드를 선택하면 해석이 표시됩니다."}
             </p>
           </div>
         )}
