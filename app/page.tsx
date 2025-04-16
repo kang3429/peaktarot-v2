@@ -107,13 +107,13 @@ export default function Home() {
 
       {card && (
         <div className="mt-6 flex flex-col items-center">
-          <img
-            src={`/cards/${card}`}
-            alt="타로카드"
-            className={`w-48 h-auto shadow-xl rounded transition-transform duration-500 ${
-              isReversed ? "rotate-180" : ""
-            }`}
-          />
+        <img
+  src={`/cards/${card}`}
+  alt="타로카드"
+  className={`w-48 h-auto shadow-xl rounded transition-transform duration-700 ease-in-out ${
+    isReversed ? "rotate-[180deg]" : ""
+  }`}
+/>
           <p className="mt-2 text-lg font-semibold text-purple-700">
             {getCardName(card)} ({isReversed ? "역방향" : "정방향"})
           </p>
