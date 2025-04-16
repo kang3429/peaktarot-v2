@@ -117,14 +117,6 @@ export default function Home() {
     "wands14.jpg": { upright: "통찰력, 비전 실행", reversed: "비현실적 계획" }
   };
 
-  function getCardName(filename: string): string {
-    return filename
-      .replace(/\.(jpg|png|jpeg)/, "")
-      .replace(/^[0-9]+-/, "")
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  }
-
   const getCardName = (filename: string) =>
     filename.replace(/\.(jpg|png|jpeg)/, "").replace(/^[0-9]+-/, "").replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
@@ -228,13 +220,17 @@ export default function Home() {
 
         {selectedCard && selectedMeaning && (
           <div className="max-w-lg bg-black/50 border border-purple-600 p-4 rounded shadow-xl animate-fadeIn mt-4">
-            <p className="text-purple-100">{selectedMeaning}</p>
+            <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
+              {selectedMeaning}
+            </p>
           </div>
         )}
 
         {answer && (
           <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-5 rounded shadow-md animate-fadeIn">
-            <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">{answer}</p>
+            <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
+              {answer.replace(/([.!?])\s+/g, "$1\n\n")}
+            </p>
           </div>
         )}
       </div>
