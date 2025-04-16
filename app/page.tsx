@@ -151,13 +151,41 @@ export default function Home() {
     }
   };
 
+  const recommendQuestion = (category: string) => {
+    switch (category) {
+      case "연애":
+        setQuestion("현재 연애운과 앞으로의 흐름은 어떻게 될까요?");
+        break;
+      case "금전":
+        setQuestion("금전운이나 재정 상태는 앞으로 어떻게 될까요?");
+        break;
+      case "진로":
+        setQuestion("지금 하고 있는 일이나 앞으로의 진로 방향은 어떨까요?");
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-[#0d0d23] via-[#1a093e] to-[#0d0d23] text-white font-sans">
-      <h1 className="text-5xl font-['Cinzel Decorative'] mb-6 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
+      <h1 className="text-5xl font-['Cinzel Decorative'] mb-4 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
         🔮 피크타로
       </h1>
 
-      <p className="text-sm sm:text-base text-purple-200 mb-4">타로 점괘를 통해 알고 싶은 고민이나 질문을 입력해보세요.</p>
+      <p className="text-sm sm:text-base text-purple-200 mb-2">타로 점괘를 통해 알고 싶은 고민이나 질문을 입력해보세요.</p>
+
+      <div className="flex gap-2 flex-wrap justify-center mb-3">
+        {['연애', '금전', '진로'].map((cat) => (
+          <button
+            key={cat}
+            onClick={() => recommendQuestion(cat)}
+            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-sm rounded shadow text-white"
+          >
+            {cat} 질문 보기
+          </button>
+        ))}
+      </div>
 
       <input
         type="text"
