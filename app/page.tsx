@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import "@fontsource/cinzel-decorative";
+import html2canvas from "html2canvas";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -11,6 +12,7 @@ export default function Home() {
   const [isReversedList, setIsReversedList] = useState<boolean[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const tarotCards = [
     "00-thefool.jpg", "01-themagician.jpg", "02-thehighpriestess.jpg", "03-theempress.jpg",
@@ -34,7 +36,7 @@ export default function Home() {
     "wands11.jpg", "wands12.jpg", "wands13.jpg", "wands14.jpg"
   ];
 
-  const cardMeanings: Partial<Record<string, { upright: string; reversed: string }>> = {
+  const cardMeanings: Record<string, { upright: string; reversed: string }> = {
     "00-thefool.jpg": { upright: "새로운 시작, 모험, 가능성", reversed: "무모함, 경고, 준비 부족" },
     "01-themagician.jpg": { upright: "의지와 집중, 창의적 실행", reversed: "기만, 속임수, 방향 상실" },
     "02-thehighpriestess.jpg": { upright: "직관, 내면의 지혜", reversed: "혼란, 비밀, 감정 억제" },
@@ -123,6 +125,9 @@ export default function Home() {
       .replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
+  const getCardName = (filename: string) =>
+    filename.replace(/\.(jpg|png|jpeg)/, "").replace(/^[0-9]+-/, "").replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+
   const handleAsk = async () => {
     if (!question) return;
     setLoading(true);
@@ -131,14 +136,9 @@ export default function Home() {
     setIsReversedList([]);
     setSelectedCardIndex(null);
 
-    // ✅ 카드 중복 없이 3장 선택
-    const selectedCardsSet = new Set<string>();
-    while (selectedCardsSet.size < 3) {
-      const card = tarotCards[Math.floor(Math.random() * tarotCards.length)];
-      selectedCardsSet.add(card);
-    }
-    const selectedCards = Array.from(selectedCardsSet);
+    const selectedCards = Array.from({ length: 3 }, () => tarotCards[Math.floor(Math.random() * tarotCards.length)]);
     const reversedList = selectedCards.map(() => Math.random() < 0.5);
+
     setCards(selectedCards);
     setIsReversedList(reversedList);
 
@@ -153,17 +153,26 @@ export default function Home() {
       const data = await res.json();
       setAnswer(data.answer);
       new Audio("/magic.mp3").play();
-    } catch (error) {
+    } catch (e) {
       setAnswer("⚠️ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(answer);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyImage = async () => {
+    if (resultRef.current) {
+      const canvas = await html2canvas(resultRef.current);
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob })
+          ]);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      });
+    }
   };
 
   const selectedCard = selectedCardIndex !== null ? cards[selectedCardIndex] : null;
@@ -182,65 +191,61 @@ export default function Home() {
         placeholder="고민이나 질문을 입력하세요"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-black/40 text-white placeholder-gray-400"
       />
 
       <button
         onClick={handleAsk}
         disabled={loading}
-        className="px-6 py-2 bg-purple-700 hover:bg-purple-800 hover:scale-105 hover:shadow-purple-500/40 transition-all duration-300 text-white font-semibold rounded disabled:opacity-50"
+        className="px-6 py-2 bg-purple-700 hover:bg-purple-800 hover:scale-105 transition text-white font-semibold rounded disabled:opacity-50"
       >
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
-      <div className="flex flex-col md:flex-row flex-wrap items-center justify-center mt-10 gap-6 max-w-4xl w-full">
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className={`flex flex-col items-center p-2 cursor-pointer transition duration-500 rounded-lg ${
-              selectedCardIndex === index ? "bg-purple-800/40 shadow-lg scale-105" : "hover:scale-105"
-            }`}
-            onClick={() => setSelectedCardIndex(index)}
-          >
-            <div className="relative">
+      <div ref={resultRef} className="w-full flex flex-col items-center mt-10 gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+          {cards.map((card, index) => (
+            <div
+              key={index}
+              className={`flex flex-col items-center p-2 cursor-pointer transition duration-500 rounded-lg ${
+                selectedCardIndex === index ? "bg-purple-800/40 shadow-lg scale-105" : "hover:scale-105"
+              }`}
+              onClick={() => setSelectedCardIndex(index)}
+            >
               <img
                 src={`/cards/${card}`}
                 alt="타로카드"
-                className={`w-32 sm:w-40 h-auto rounded-md shadow-[0_0_25px_rgba(186,113,255,0.4)] transition-transform duration-700 ease-in-out ${isReversedList[index] ? "rotate-[180deg]" : ""}`}
+                className={`w-32 sm:w-40 h-auto rounded-md shadow-[0_0_25px_rgba(186,113,255,0.4)] transition-transform duration-700 ease-in-out ${
+                  isReversedList[index] ? "rotate-[180deg]" : ""
+                }`}
               />
-              <span className="absolute -top-2 -right-2 text-xs bg-purple-500 rounded-full px-2 py-1 font-bold shadow text-white">
-                {index + 1}
-              </span>
+              <p className="mt-2 text-sm sm:text-base font-semibold text-purple-200">
+                {getCardName(card)} ({isReversedList[index] ? "역방향" : "정방향"})
+              </p>
             </div>
-            <p className="mt-2 text-base sm:text-lg font-semibold text-purple-200">
-              {getCardName(card)} ({isReversedList[index] ? "역방향" : "정방향"})
-            </p>
+          ))}
+        </div>
+
+        {selectedCard && selectedMeaning && (
+          <div className="max-w-lg bg-black/50 border border-purple-600 p-4 rounded shadow-xl animate-fadeIn mt-4">
+            <p className="text-purple-100">{selectedMeaning}</p>
           </div>
-        ))}
+        )}
+
+        {answer && (
+          <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-5 rounded shadow-md animate-fadeIn">
+            <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">{answer}</p>
+          </div>
+        )}
       </div>
 
-      {selectedCard && (
-        <div className="mt-6 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl animate-fadeIn transition duration-500">
-          <h2 className="text-xl sm:text-2xl text-purple-200 mb-2 font-bold">📖 선택한 카드 해석</h2>
-          <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
-            {selectedMeaning || "❓ 이 카드의 의미는 아직 준비 중이에요."}
-          </p>
-        </div>
-      )}
-
       {answer && (
-        <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-6 rounded shadow-md animate-fadeIn">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg sm:text-xl text-purple-300 font-semibold">✨ 해석 결과</h2>
-            <button
-              onClick={handleCopy}
-              className="text-xs px-3 py-1 bg-purple-700 rounded hover:bg-purple-600 transition"
-            >
-              {copied ? "✅ 복사됨" : "공유"}
-            </button>
-          </div>
-          <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">{answer}</p>
-        </div>
+        <button
+          onClick={handleCopyImage}
+          className="mt-4 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded shadow transition"
+        >
+          {copied ? "✅ 클립보드에 복사됨!" : "📸 리딩 결과 이미지 복사"}
+        </button>
       )}
     </main>
   );
