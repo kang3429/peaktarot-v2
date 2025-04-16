@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "@fontsource/cinzel-decorative";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
-  const [card, setCard] = useState("");
-  const [isReversed, setIsReversed] = useState(false);
+  const [cards, setCards] = useState<string[]>([]);
+  const [isReversedList, setIsReversedList] = useState<boolean[]>([]);
 
   const tarotCards = [
     "00-thefool.jpg", "01-themagician.jpg", "02-thehighpriestess.jpg", "03-theempress.jpg",
@@ -32,7 +32,7 @@ export default function Home() {
     "wands11.jpg", "wands12.jpg", "wands13.jpg", "wands14.jpg"
   ];
 
-  const cardMeanings: Record<string, { upright: string; reversed: string }> = {
+  const cardMeanings: Partial<Record<string, { upright: string; reversed: string }>> = {
     "00-thefool.jpg": { upright: "새로운 시작, 모험, 가능성", reversed: "무모함, 경고, 준비 부족" },
     "01-themagician.jpg": { upright: "의지와 집중, 창의적 실행", reversed: "기만, 속임수, 방향 상실" },
     "02-thehighpriestess.jpg": { upright: "직관, 내면의 지혜", reversed: "혼란, 비밀, 감정 억제" },
