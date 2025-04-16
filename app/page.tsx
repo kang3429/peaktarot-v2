@@ -128,12 +128,18 @@ export default function Home() {
     setCards(selectedCards);
     setIsReversedList(reversedList);
 
+    const combinedMeaning = selectedCards.map((card, index) => {
+      const direction = isReversedList[index] ? "역방향" : "정방향";
+      const meaning = cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "해석 없음";
+      return `\n${getCardName(card)} (${direction}): ${meaning}`;
+    }).join("\n\n");
+
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: `${question} (${reversedList.map(r => r ? "역방향" : "정방향").join(", ")})`
+          question: `${question}\n\n카드별 해석:\n${combinedMeaning}`
         })
       });
       const data = await res.json();
