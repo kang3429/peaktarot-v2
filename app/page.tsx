@@ -129,12 +129,25 @@ export default function Home() {
     setIsReversedList(reversedList);
 
     const cardExplanations = selectedCards.map((card, index) => {
+      const name = getCardName(card);
       const direction = isReversedList[index] ? "역방향" : "정방향";
       const meaning = cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "해석 없음";
-      return `${getCardName(card)} (${direction}): ${meaning}`;
+      return `카드 ${index + 1}:
+이름: ${name}
+방향: ${direction}
+해석: ${meaning}`;
     }).join("\n\n");
 
-    const fullPrompt = `아래는 사용자의 질문과 타로카드 3장의 결과입니다.\n\n[질문]\n${question}\n\n[카드 해석]\n${cardExplanations}\n\n각 카드에 대한 해석을 한 문단씩 작성한 뒤, 전체적인 흐름과 조합을 바탕으로 종합적인 리딩을 제시해 주세요.`;
+    const fullPrompt = `당신은 전문 타로 마스터입니다. 다음은 사용자의 질문과 3장의 타로 카드 결과입니다.
+
+[질문]
+${question}
+
+[카드 정보]
+${cardExplanations}
+
+각 카드에 대해 방향(정방향/역방향)을 정확히 반영하여 해석해 주세요.
+마지막에는 전체 흐름을 종합한 리딩을 추가해주세요.`;
 
     try {
       const res = await fetch("/api/ask", {
@@ -247,4 +260,3 @@ export default function Home() {
     </main>
   );
 }
-
