@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import "@fontsource/cinzel-decorative";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -149,35 +150,37 @@ export default function Home() {
   const cardMeaning = cardMeanings[card];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white">
-      <h1 className="text-4xl font-extrabold mb-8 text-purple-300 drop-shadow-md">🔮 피크타로</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-[#0d0d23] via-[#1a093e] to-[#0d0d23] text-white font-sans">
+      <h1 className="text-5xl font-[\'Cinzel Decorative\'] mb-10 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
+        🔮 피크타로
+      </h1>
       <input
         type="text"
         placeholder="고민이나 질문을 입력하세요"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
       />
       <button
         onClick={handleAsk}
         disabled={loading}
-        className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded transition disabled:opacity-50"
+        className="px-6 py-2 bg-purple-700 hover:bg-purple-800 hover:scale-105 hover:shadow-purple-500/40 transition-all duration-300 text-white font-semibold rounded disabled:opacity-50"
       >
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
       {card && (
-        <div className="mt-8 flex flex-col items-center animate-fadeIn">
+        <div className="mt-10 flex flex-col items-center animate-fadeIn">
           <img
             src={`/cards/${card}`}
             alt="타로카드"
-            className={`w-48 h-auto shadow-2xl rounded transition-transform duration-700 ease-in-out ${isReversed ? "rotate-[180deg]" : ""}`}
+            className={`w-52 h-auto shadow-[0_0_30px_rgba(186,113,255,0.4)] rounded-lg transition-transform duration-700 ease-in-out ${isReversed ? "rotate-[180deg]" : ""}`}
           />
-          <p className="mt-3 text-xl font-bold text-purple-200 drop-shadow-sm">
+          <p className="mt-4 text-2xl font-bold text-purple-200 drop-shadow-md">
             {getCardName(card)} ({isReversed ? "역방향" : "정방향"})
           </p>
           {cardMeaning && (
-            <p className="mt-1 text-sm text-purple-300 italic">
+            <p className="mt-2 text-sm text-purple-300 italic">
               {isReversed ? cardMeaning.reversed : cardMeaning.upright}
             </p>
           )}
@@ -185,8 +188,10 @@ export default function Home() {
       )}
 
       {answer && (
-        <div className="mt-6 max-w-lg bg-gray-800 border border-gray-600 p-5 rounded shadow-lg">
-          <p className="text-purple-100 whitespace-pre-line leading-relaxed">{answer}</p>
+        <div className="mt-10 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl">
+          <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
+            {answer}
+          </p>
         </div>
       )}
     </main>
