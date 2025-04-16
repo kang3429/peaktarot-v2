@@ -231,7 +231,7 @@ export default function Home() {
       {answer && (
         <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-6 rounded shadow-md animate-fadeIn">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg sm:text-xl text-purple-300 font-semibold">✨ AI 리딩</h2>
+            <h2 className="text-lg sm:text-xl text-purple-300 font-semibold">✨ 해석 결과</h2>
             <button
               onClick={handleCopy}
               className="text-xs px-3 py-1 bg-purple-700 rounded hover:bg-purple-600 transition"
