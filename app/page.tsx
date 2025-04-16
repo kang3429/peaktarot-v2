@@ -125,21 +125,28 @@ export default function Home() {
     if (!question) return;
     setLoading(true);
     setAnswer("");
+    setCards([]);
+    setIsReversedList([]);
 
-    const random = tarotCards[Math.floor(Math.random() * tarotCards.length)];
-    setCard(random);
-
-    const reversed = Math.random() < 0.5;
-    setIsReversed(reversed);
+    const selectedCards = Array.from({ length: 3 }, () => {
+      const random = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+      return random;
+    });
+    const reversedList = selectedCards.map(() => Math.random() < 0.5);
+    setCards(selectedCards);
+    setIsReversedList(reversedList);
 
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: `${question} (${reversed ? "역방향" : "정방향"})` }),
+        body: JSON.stringify({
+          question: `${question} (${reversedList.map(r => r ? "역방향" : "정방향").join(", ")})`
+        }),
       });
       const data = await res.json();
       setAnswer(data.answer);
+      new Audio("/magic.mp3").play();
     } catch (error) {
       setAnswer("⚠️ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
@@ -147,11 +154,9 @@ export default function Home() {
     }
   };
 
-  const cardMeaning = cardMeanings[card];
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-[#0d0d23] via-[#1a093e] to-[#0d0d23] text-white font-sans">
-      <h1 className="text-5xl font-[\'Cinzel Decorative\'] mb-10 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
+      <h1 className="text-5xl font-['Cinzel Decorative'] mb-8 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
         🔮 피크타로
       </h1>
       <input
@@ -169,23 +174,23 @@ export default function Home() {
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
-      {card && (
-        <div className="mt-10 flex flex-col items-center animate-fadeIn">
-          <img
-            src={`/cards/${card}`}
-            alt="타로카드"
-            className={`w-52 h-auto shadow-[0_0_30px_rgba(186,113,255,0.4)] rounded-lg transition-transform duration-700 ease-in-out ${isReversed ? "rotate-[180deg]" : ""}`}
-          />
-          <p className="mt-4 text-2xl font-bold text-purple-200 drop-shadow-md blur-[0.5px]">
-            {getCardName(card)} ({isReversed ? "역방향" : "정방향"})
-          </p>
-          {cardMeaning && (
-            <p className="mt-2 text-sm text-purple-300 italic animate-fadeIn scale-95">
-              {isReversed ? cardMeaning.reversed : cardMeaning.upright}
+      <div className="flex flex-col md:flex-row items-center justify-center mt-10 gap-6">
+        {cards.map((card, index) => (
+          <div key={index} className="flex flex-col items-center animate-fadeIn transition-transform duration-700 ease-in-out scale-95 hover:scale-100">
+            <img
+              src={`/cards/${card}`}
+              alt="타로카드"
+              className={`w-44 h-auto shadow-[0_0_25px_rgba(186,113,255,0.4)] rounded-lg transition-transform duration-700 ease-in-out ${isReversedList[index] ? "rotate-[180deg]" : ""}`}
+            />
+            <p className="mt-3 text-xl font-bold text-purple-200 drop-shadow-sm">
+              {getCardName(card)} ({isReversedList[index] ? "역방향" : "정방향"})
             </p>
-          )}
-        </div>
-      )}
+            <p className="mt-1 text-sm text-purple-300 italic blur-[0.2px]">
+              {cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "의미 없음"}
+            </p>
+          </div>
+        ))}
+      </div>
 
       {answer && (
         <div className="mt-10 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl animate-fadeIn">
