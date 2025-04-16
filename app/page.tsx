@@ -176,11 +176,11 @@ export default function Home() {
             alt="타로카드"
             className={`w-52 h-auto shadow-[0_0_30px_rgba(186,113,255,0.4)] rounded-lg transition-transform duration-700 ease-in-out ${isReversed ? "rotate-[180deg]" : ""}`}
           />
-          <p className="mt-4 text-2xl font-bold text-purple-200 drop-shadow-md">
+          <p className="mt-4 text-2xl font-bold text-purple-200 drop-shadow-md blur-[0.5px]">
             {getCardName(card)} ({isReversed ? "역방향" : "정방향"})
           </p>
           {cardMeaning && (
-            <p className="mt-2 text-sm text-purple-300 italic">
+            <p className="mt-2 text-sm text-purple-300 italic animate-fadeIn scale-95">
               {isReversed ? cardMeaning.reversed : cardMeaning.upright}
             </p>
           )}
@@ -188,7 +188,7 @@ export default function Home() {
       )}
 
       {answer && (
-        <div className="mt-10 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl">
+        <div className="mt-10 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl animate-fadeIn">
           <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
             {answer}
           </p>

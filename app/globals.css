@@ -27,3 +27,7 @@ body {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Cinzel Decorative', cursive;
+}
