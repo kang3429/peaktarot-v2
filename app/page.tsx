@@ -135,7 +135,7 @@ export default function Home() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: `${question} (${reversed ? "역방향" : "정방향"})` })
+        body: JSON.stringify({ question: `${question} (${reversed ? "역방향" : "정방향"})` }),
       });
       const data = await res.json();
       setAnswer(data.answer);
@@ -146,47 +146,47 @@ export default function Home() {
     }
   };
 
+  const cardMeaning = cardMeanings[card];
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-      <h1 className="text-3xl font-bold mb-6">🔮 피크타로</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white">
+      <h1 className="text-4xl font-extrabold mb-8 text-purple-300 drop-shadow-md">🔮 피크타로</h1>
       <input
         type="text"
         placeholder="고민이나 질문을 입력하세요"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="w-full max-w-md p-2 border border-gray-400 rounded mb-4"
+        className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
       />
       <button
         onClick={handleAsk}
         disabled={loading}
-        className="px-4 py-2 bg-purple-600 text-white rounded disabled:opacity-50"
+        className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded transition disabled:opacity-50"
       >
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
       {card && (
-        <div className="mt-6 flex flex-col items-center">
+        <div className="mt-8 flex flex-col items-center animate-fadeIn">
           <img
             src={`/cards/${card}`}
             alt="타로카드"
-            className={`w-48 h-auto shadow-xl rounded transition-transform duration-700 ease-in-out ${
-              isReversed ? "rotate-[180deg]" : ""
-            }`}
+            className={`w-48 h-auto shadow-2xl rounded transition-transform duration-700 ease-in-out ${isReversed ? "rotate-[180deg]" : ""}`}
           />
-          <p className="mt-2 text-lg font-semibold text-purple-700">
+          <p className="mt-3 text-xl font-bold text-purple-200 drop-shadow-sm">
             {getCardName(card)} ({isReversed ? "역방향" : "정방향"})
           </p>
-          {cardMeanings[card] && (
-            <p className="text-sm text-gray-600">
-              {isReversed ? cardMeanings[card].reversed : cardMeanings[card].upright}
+          {cardMeaning && (
+            <p className="mt-1 text-sm text-purple-300 italic">
+              {isReversed ? cardMeaning.reversed : cardMeaning.upright}
             </p>
           )}
         </div>
       )}
 
       {answer && (
-        <div className="mt-4 max-w-lg bg-gray-100 p-4 rounded shadow">
-          <p>{answer}</p>
+        <div className="mt-6 max-w-lg bg-gray-800 border border-gray-600 p-5 rounded shadow-lg">
+          <p className="text-purple-100 whitespace-pre-line leading-relaxed">{answer}</p>
         </div>
       )}
     </main>
