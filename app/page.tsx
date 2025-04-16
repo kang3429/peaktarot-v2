@@ -133,24 +133,23 @@ export default function Home() {
       const direction = isReversedList[index] ? "역방향" : "정방향";
       const meaning = cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "의미 없음";
       return `카드 ${index + 1} - ${name}
-    방향: ${direction}
-    의미: ${meaning}`;
+방향: ${direction}
+의미: ${meaning}`;
     }).join("\n\n");
-    
+
     const fullPrompt = `
-    당신은 전문 타로 마스터입니다.
-    
-    [사용자 질문]
-    ${question}
-    
-    [카드 해석 목록]
-    ${cardExplanations}
-    
-    위 3장의 카드를 기반으로 각 카드의 의미를 정확히 반영해 해석해 주세요. 
-    특히 각 카드의 **방향(정방향/역방향)** 을 기반으로 해석해야 하며, 의미에 포함된 내용을 참고해 설명해야 합니다.
-    
-    마지막에는 세 카드의 조합을 종합적으로 해석해 주세요.
-    `;
+당신은 전문 타로 마스터입니다.
+
+[사용자 질문]
+${question}
+
+[카드 해석 목록]
+${cardExplanations}
+
+위 3장의 카드를 기반으로 각 카드의 의미를 정확히 반영해 해석해 주세요. 
+특히 각 카드의 방향(정방향/역방향)을 기반으로 해석해야 하며, 의미에 포함된 내용을 참고해 설명해야 합니다.
+
+마지막에는 세 카드의 조합을 종합적으로 해석해 주세요.`;
 
     try {
       const res = await fetch("/api/ask", {
@@ -233,22 +232,6 @@ export default function Home() {
               </p>
             </div>
           ))}
-        </div>
-
-        <div className="mt-6 space-y-4">
-          {cards.map((card, index) => {
-            const meaning = cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "해석 없음";
-            return (
-              <div key={index} className="max-w-lg bg-black/50 border border-purple-600 p-5 rounded shadow-md animate-fadeIn">
-                <h2 className="text-lg sm:text-xl text-purple-300 font-semibold mb-2">
-                  {getCardName(card)} ({isReversedList[index] ? "역방향" : "정방향"})
-                </h2>
-                <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
-                  {meaning.replace(/([.!?])\s+/g, "$1\n\n")}
-                </p>
-              </div>
-            );
-          })}
         </div>
 
         {answer && (
