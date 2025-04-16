@@ -128,19 +128,19 @@ export default function Home() {
     setCards(selectedCards);
     setIsReversedList(reversedList);
 
-    const combinedMeaning = selectedCards.map((card, index) => {
+    const cardExplanations = selectedCards.map((card, index) => {
       const direction = isReversedList[index] ? "역방향" : "정방향";
       const meaning = cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "해석 없음";
-      return `\n${getCardName(card)} (${direction}): ${meaning}`;
+      return `${getCardName(card)} (${direction}): ${meaning}`;
     }).join("\n\n");
+
+    const fullPrompt = `아래는 사용자의 질문과 타로카드 3장의 결과입니다.\n\n[질문]\n${question}\n\n[카드 해석]\n${cardExplanations}\n\n각 카드에 대한 해석을 한 문단씩 작성한 뒤, 전체적인 흐름과 조합을 바탕으로 종합적인 리딩을 제시해 주세요.`;
 
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: `${question}\n\n카드별 해석:\n${combinedMeaning}`
-        })
+        body: JSON.stringify({ question: fullPrompt })
       });
       const data = await res.json();
       setAnswer(data.answer);
@@ -209,6 +209,7 @@ export default function Home() {
 
         {answer && (
           <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-5 rounded shadow-md animate-fadeIn">
+            <h2 className="text-lg sm:text-xl text-purple-300 font-semibold mb-2">🔮 종합 리딩</h2>
             <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
               {answer.replace(/([.!?])\s+/g, "$1\n\n")}
             </p>
