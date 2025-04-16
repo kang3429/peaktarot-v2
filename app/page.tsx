@@ -9,6 +9,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState<string[]>([]);
   const [isReversedList, setIsReversedList] = useState<boolean[]>([]);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const tarotCards = [
     "00-thefool.jpg", "01-themagician.jpg", "02-thehighpriestess.jpg", "03-theempress.jpg",
@@ -127,11 +129,15 @@ export default function Home() {
     setAnswer("");
     setCards([]);
     setIsReversedList([]);
+    setSelectedCardIndex(null);
 
-    const selectedCards = Array.from({ length: 3 }, () => {
-      const random = tarotCards[Math.floor(Math.random() * tarotCards.length)];
-      return random;
-    });
+    // ✅ 카드 중복 없이 3장 선택
+    const selectedCardsSet = new Set<string>();
+    while (selectedCardsSet.size < 3) {
+      const card = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+      selectedCardsSet.add(card);
+    }
+    const selectedCards = Array.from(selectedCardsSet);
     const reversedList = selectedCards.map(() => Math.random() < 0.5);
     setCards(selectedCards);
     setIsReversedList(reversedList);
@@ -154,11 +160,23 @@ export default function Home() {
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(answer);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const selectedCard = selectedCardIndex !== null ? cards[selectedCardIndex] : null;
+  const selectedMeaning = selectedCard && cardMeanings[selectedCard]
+    ? cardMeanings[selectedCard][isReversedList[selectedCardIndex!] ? "reversed" : "upright"]
+    : null;
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-[#0d0d23] via-[#1a093e] to-[#0d0d23] text-white font-sans">
-      <h1 className="text-5xl font-['Cinzel Decorative'] mb-8 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
+      <h1 className="text-5xl font-['Cinzel Decorative'] mb-6 text-purple-300 drop-shadow-lg tracking-wide animate-pulse">
         🔮 피크타로
       </h1>
+
       <input
         type="text"
         placeholder="고민이나 질문을 입력하세요"
@@ -166,6 +184,7 @@ export default function Home() {
         onChange={(e) => setQuestion(e.target.value)}
         className="w-full max-w-md p-3 border border-purple-400 rounded shadow mb-4 bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
       />
+
       <button
         onClick={handleAsk}
         disabled={loading}
@@ -174,29 +193,53 @@ export default function Home() {
         {loading ? "리딩 중..." : "타로 보기"}
       </button>
 
-      <div className="flex flex-col md:flex-row items-center justify-center mt-10 gap-6">
+      <div className="flex flex-col md:flex-row flex-wrap items-center justify-center mt-10 gap-6 max-w-4xl w-full">
         {cards.map((card, index) => (
-          <div key={index} className="flex flex-col items-center animate-fadeIn transition-transform duration-700 ease-in-out scale-95 hover:scale-100">
-            <img
-              src={`/cards/${card}`}
-              alt="타로카드"
-              className={`w-44 h-auto shadow-[0_0_25px_rgba(186,113,255,0.4)] rounded-lg transition-transform duration-700 ease-in-out ${isReversedList[index] ? "rotate-[180deg]" : ""}`}
-            />
-            <p className="mt-3 text-xl font-bold text-purple-200 drop-shadow-sm">
+          <div
+            key={index}
+            className={`flex flex-col items-center p-2 cursor-pointer transition duration-500 rounded-lg ${
+              selectedCardIndex === index ? "bg-purple-800/40 shadow-lg scale-105" : "hover:scale-105"
+            }`}
+            onClick={() => setSelectedCardIndex(index)}
+          >
+            <div className="relative">
+              <img
+                src={`/cards/${card}`}
+                alt="타로카드"
+                className={`w-32 sm:w-40 h-auto rounded-md shadow-[0_0_25px_rgba(186,113,255,0.4)] transition-transform duration-700 ease-in-out ${isReversedList[index] ? "rotate-[180deg]" : ""}`}
+              />
+              <span className="absolute -top-2 -right-2 text-xs bg-purple-500 rounded-full px-2 py-1 font-bold shadow text-white">
+                {index + 1}
+              </span>
+            </div>
+            <p className="mt-2 text-base sm:text-lg font-semibold text-purple-200">
               {getCardName(card)} ({isReversedList[index] ? "역방향" : "정방향"})
-            </p>
-            <p className="mt-1 text-sm text-purple-300 italic blur-[0.2px]">
-              {cardMeanings[card]?.[isReversedList[index] ? "reversed" : "upright"] || "의미 없음"}
             </p>
           </div>
         ))}
       </div>
 
-      {answer && (
-        <div className="mt-10 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl animate-fadeIn">
+      {selectedCard && (
+        <div className="mt-6 max-w-lg bg-black/50 border border-purple-600 p-6 rounded shadow-xl animate-fadeIn transition duration-500">
+          <h2 className="text-xl sm:text-2xl text-purple-200 mb-2 font-bold">📖 선택한 카드 해석</h2>
           <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">
-            {answer}
+            {selectedMeaning || "❓ 이 카드의 의미는 아직 준비 중이에요."}
           </p>
+        </div>
+      )}
+
+      {answer && (
+        <div className="mt-6 max-w-lg bg-black/40 border border-purple-600 p-6 rounded shadow-md animate-fadeIn">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg sm:text-xl text-purple-300 font-semibold">✨ AI 리딩</h2>
+            <button
+              onClick={handleCopy}
+              className="text-xs px-3 py-1 bg-purple-700 rounded hover:bg-purple-600 transition"
+            >
+              {copied ? "✅ 복사됨" : "공유"}
+            </button>
+          </div>
+          <p className="text-purple-100 whitespace-pre-line leading-relaxed text-md">{answer}</p>
         </div>
       )}
     </main>
